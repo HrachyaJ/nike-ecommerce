@@ -1,11 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useCartStore } from "@/store/cart.store";
 
-export default function Navbar() {
+type User = {
+  id: string;
+  name: string | null;
+  email: string;
+  image?: string | null;
+} | null;
+
+type NavbarProps = {
+  user: User;
+};
+
+export default function Navbar({ user }: NavbarProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const hydrate = useCartStore((s) => s.hydrate);
+  const items = useCartStore((s) => s.items);
+
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
@@ -25,50 +43,63 @@ export default function Navbar() {
           {/* Desktop Navigation */}
           <div className="hidden md:flex md:items-center md:space-x-8">
             <Link
-              href="/men"
+              href="/products?gender=men"
               className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
               Men
             </Link>
             <Link
-              href="/women"
+              href="/products?gender=women"
               className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
               Women
             </Link>
             <Link
-              href="/kids"
+              href="/products?gender=kids"
               className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
               Kids
-            </Link>
-            <Link
-              href="/collections"
-              className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
-            >
-              Collections
-            </Link>
-            <Link
-              href="/contact"
-              className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
-            >
-              Contact
             </Link>
           </div>
 
           {/* Desktop Actions */}
           <div className="hidden md:flex md:items-center md:space-x-6">
-            <Link
-              href="/search"
-              className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
-            >
-              Search
-            </Link>
+            {user ? (
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                {user.image ? (
+                  <Image
+                    src={user.image}
+                    alt={user.name || "User"}
+                    width={32}
+                    height={32}
+                    className="rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-dark-900 text-white flex items-center justify-center text-sm font-semibold">
+                    {user.name?.charAt(0).toUpperCase() ||
+                      user.email.charAt(0).toUpperCase()}
+                  </div>
+                )}
+                <span className="hidden lg:inline">
+                  {user.name || "Profile"}
+                </span>
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
+              >
+                Login
+              </Link>
+            )}
             <Link
               href="/cart"
               className="text-dark-900 hover:text-dark-700 px-3 py-2 text-sm font-medium transition-colors duration-200"
             >
-              My Cart (2)
+              My Cart ({items.length})
             </Link>
           </div>
 
@@ -117,47 +148,44 @@ export default function Navbar() {
       <div className={`${isMobileMenuOpen ? "block" : "hidden"} md:hidden`}>
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3 bg-white border-t border-gray-100">
           <Link
-            href="/men"
+            href="/products?gender=men"
             className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
           >
             Men
           </Link>
           <Link
-            href="/women"
+            href="/products?gender=women"
             className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
           >
             Women
           </Link>
           <Link
-            href="/kids"
+            href="/products?gender=kids"
             className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
           >
             Kids
           </Link>
-          <Link
-            href="/collections"
-            className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
-          >
-            Collections
-          </Link>
-          <Link
-            href="/contact"
-            className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
-          >
-            Contact
-          </Link>
           <div className="pt-4 border-t border-gray-200">
-            <Link
-              href="/search"
-              className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
-            >
-              Search
-            </Link>
+            {user ? (
+              <Link
+                href="/profile"
+                className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
+              >
+                Profile
+              </Link>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
+              >
+                Login
+              </Link>
+            )}
             <Link
               href="/cart"
               className="text-dark-900 hover:text-dark-700 block px-3 py-2 text-base font-medium transition-colors duration-200"
             >
-              My Cart (2)
+              My Cart ({items.length})
             </Link>
           </div>
         </div>

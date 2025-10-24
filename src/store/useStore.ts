@@ -1,11 +1,11 @@
 import { create } from 'zustand';
-import { Product } from '@/db/schema';
+import { SelectProduct } from '@/lib/db/schema';
 
 interface ProductStore {
-  products: Product[];
+  products: SelectProduct[];
   loading: boolean;
   error: string | null;
-  setProducts: (products: Product[]) => void;
+  setProducts: (products: SelectProduct[]) => void;
   setLoading: (loading: boolean) => void;
   setError: (error: string | null) => void;
   fetchProducts: () => Promise<void>;

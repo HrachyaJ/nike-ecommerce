@@ -18,7 +18,6 @@ export interface CardProps {
 }
 
 export default function Card({
-  id,
   title,
   description,
   category,
@@ -68,7 +67,7 @@ export default function Card({
       </div>
 
       {/* Content */}
-      <div className="p-6">
+      <div className="py-6">
         {/* Title and Price */}
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-black font-medium text-base leading-tight flex-1 pr-4">
@@ -81,19 +80,17 @@ export default function Card({
           )}
         </div>
 
-        {/* Category */}
+        {/* Description (Category like "Men's Shoes") - Now shown first */}
+        {description && (
+          <p className="text-gray-500 text-base mb-1">{description}</p>
+        )}
+
+        {/* Category (Color info like "6 Colour") - Now shown second */}
         {category && <p className="text-gray-500 text-base mb-1">{category}</p>}
 
         {/* Color Options */}
         {colorOptions && (
           <p className="text-gray-500 text-base">{colorOptions}</p>
-        )}
-
-        {/* Description */}
-        {description && (
-          <p className="text-gray-700 text-sm mt-3 line-clamp-2">
-            {description}
-          </p>
         )}
 
         {/* Action Button */}

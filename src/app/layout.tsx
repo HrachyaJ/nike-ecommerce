@@ -31,7 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${jost.className} antialiased bg-light-200 text-dark-900`}
+        className={`${jost.className} antialiased text-dark-900`}
       >
         {children}
       </body>

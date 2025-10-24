@@ -3,7 +3,7 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import * as schema from "@/lib/db/schema/index";
 import { v4 as uuidv4 } from "uuid";
 import { nextCookies } from "better-auth/next-js";
-import { db } from "..";
+import { db } from "../db";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -17,31 +17,33 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false,
+    requireEmailVerification: false, // This allows sign in without verification
+    autoSignIn: true, // Automatically sign in after sign up
   },
-  socialProviders: {},
-  sessions: {
+  session: {
+    expiresIn: 60 * 60 * 24 * 7, // 7 days
+    updateAge: 60 * 60 * 24, // Update session every 24 hours
     cookieCache: {
       enabled: true,
-      maxAge: 60 * 60 * 24 * 7,
+      maxAge: 5 * 60, // 5 minutes
     },
   },
-  cookies: {
-    sessionToken: {
-      name: "auth_session",
-      options: {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "strict",
-        path: "/",
-        maxAge: 60 * 60 * 24 * 7,
+  user: {
+    additionalFields: {
+      emailVerified: {
+        type: "boolean",
+        defaultValue: false, // Users start unverified but can still sign in
+        required: false,
       },
     },
   },
   advanced: {
-    database: {
-      generateId: () => uuidv4(),
+    generateId: () => uuidv4(),
+    cookiePrefix: "better-auth",
+    crossSubDomainCookies: {
+      enabled: false,
     },
   },
+  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
   plugins: [nextCookies()],
 });

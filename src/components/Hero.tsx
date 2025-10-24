@@ -34,7 +34,7 @@ export default function Hero() {
               </p>
             </div>
             
-            <Link href="/" className='className="inline-block bg-dark-900 text-white px-8 py-3 rounded-full text-lg"' >
+            <Link href="/products" className='inline-block bg-dark-900 text-white px-8 py-3 rounded-full text-lg' >
               Find Your Shoe
             </Link>
           </div>

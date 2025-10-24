@@ -57,3 +57,12 @@
   --text-footnote--line-height: 18px;
   --text-footnote--font-weight: 400;
 }
+
+/* Custom utility classes */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* Internet Explorer 10+ */
+  scrollbar-width: none;  /* Firefox */
+}
+.scrollbar-hide::-webkit-scrollbar { 
+  display: none;  /* Safari and Chrome */
+}

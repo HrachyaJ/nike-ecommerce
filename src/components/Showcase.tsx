@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 import React from "react";
 
 export default function Showcase() {
@@ -30,8 +31,10 @@ export default function Showcase() {
             <p className="text-lg md:text-xl text-gray-200 mb-8">
               With React foam for the most comfortable Presto ever.
             </p>
-            <button className="bg-white text-black font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200 text-sm md:text-base">
-              Shop Now
+            <button className="bg-white text-black font-semibold px-8 py-3 rounded-full hover:bg-gray-100 transition-colors duration-200 text-sm md:text-base cursor-pointer">
+              <Link href="/products">
+                Shop Now
+              </Link>
             </button>
           </div>
         </div>

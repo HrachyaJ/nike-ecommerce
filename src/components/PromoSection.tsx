@@ -1,5 +1,5 @@
-import Image from 'next/image';
-import Link from 'next/link';
+import Image from "next/image";
+import Link from "next/link";
 
 export default function PromoSection() {
   return (
@@ -8,7 +8,7 @@ export default function PromoSection() {
       <div
         className="absolute inset-0 bg-orange-200 transform-gpu"
         style={{
-          clipPath: 'polygon(75% 0%, 95% 0%, 65% 100%, 45% 100%)'
+          clipPath: "polygon(75% 0%, 95% 0%, 65% 100%, 45% 100%)",
         }}
         aria-hidden="true"
       ></div>
@@ -26,11 +26,12 @@ export default function PromoSection() {
               PRESTO BY YOU
             </h1>
             <p className="text-lg text-gray-700 max-w-md mx-auto lg:mx-0">
-              Take advantage of brand new, proprietary cushioning technology with a fresh pair of Nike react shoes.
+              Take advantage of brand new, proprietary cushioning technology
+              with a fresh pair of Nike react shoes.
             </p>
-            <Link 
-              href="/" 
-              className="inline-block bg-gray-900 text-white px-8 py-3 rounded-full text-lg font-medium hover:bg-gray-800 transition-colors"
+            <Link
+              href="/products"
+              className='inline-block bg-dark-900 text-white px-8 py-3 rounded-full text-lg'
             >
               Shop Now
             </Link>
