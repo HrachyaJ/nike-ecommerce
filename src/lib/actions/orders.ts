@@ -193,13 +193,13 @@ export async function getOrder(orderId: string) {
       type OrderWithRelations = typeof orders.$inferSelect & {
         items: Array<{
           variant: {
-            product: any;
+            product: { id: string; [key: string]: unknown };
             productId: string;
           };
         }>;
-        user: any;
-        shippingAddress: any;
-        billingAddress: any;
+        user: { [key: string]: unknown } | null;
+        shippingAddress: { [key: string]: unknown } | null;
+        billingAddress: { [key: string]: unknown } | null;
       };
 
       const order = (await db.query.orders.findFirst({
@@ -239,7 +239,12 @@ export async function getOrder(orderId: string) {
         ...order,
         items: await Promise.all(
           order.items.map(
-            async (item: { variant: { product: any; productId: string } }) => {
+            async (item: {
+              variant: {
+                product: { id: string; [key: string]: unknown };
+                productId: string;
+              };
+            }) => {
               const productImage = await db.query.productImages.findFirst({
                 where: and(
                   eq(productImages.productId, item.variant.product.id),

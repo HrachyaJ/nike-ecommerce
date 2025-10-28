@@ -87,7 +87,7 @@ export default function SizePicker({ sizes }: SizePickerProps) {
           stand on it with one foot, trace its outline, and mark the tip of your
           longest toe and the outermost part of your heel. Then, measure the
           straight line distance from the heel mark to the toe mark to get your
-          foot's length
+          foot&apos;s length
           <div className="absolute -bottom-2 left-4 w-4 h-4 bg-gray-900 transform rotate-45"></div>
         </div>
       </div>

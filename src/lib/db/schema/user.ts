@@ -1,10 +1,4 @@
-import {
-  pgTable,
-  uuid,
-  varchar,
-  boolean,
-  timestamp,
-} from "drizzle-orm/pg-core";
+import { pgTable, uuid, varchar, boolean } from "drizzle-orm/pg-core";
 import { baseTimestampColumns } from "./types";
 
 export const users = pgTable("user", {

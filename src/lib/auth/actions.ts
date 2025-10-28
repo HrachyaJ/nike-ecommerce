@@ -8,13 +8,23 @@ import { randomUUID } from "crypto";
 import { db } from "../db";
 import { auth } from ".";
 
+function extractErrorBodyMessage(error: unknown): string {
+  if (error instanceof Error) return error.message;
+  try {
+    const maybe = error as { body?: { message?: string } } | undefined;
+    return maybe?.body?.message ?? "";
+  } catch {
+    return "";
+  }
+}
+
 const COOKIE_OPTIONS = {
   httpOnly: true as const,
   secure: process.env.NODE_ENV === "production",
-  sameSite: "strict" as const,
+  sameSite: "lax" as const, // Changed from strict to lax for better compatibility
   path: "/" as const,
   maxAge: 60 * 60 * 24 * 7, // 7 days
-};
+} as const;
 
 const emailSchema = z.string().email("Please enter a valid email address");
 const passwordSchema = z
@@ -24,7 +34,8 @@ const passwordSchema = z
 const nameSchema = z
   .string()
   .min(1, "Name is required")
-  .max(100, "Name must be less than 100 characters");
+  .max(100, "Name must be less than 100 characters")
+  .trim();
 
 type ActionResponse<T = void> =
   | { success: true; data: T }
@@ -38,7 +49,17 @@ export async function createGuestSession(): Promise<
     const existing = cookieStore.get("guest_session");
 
     if (existing?.value) {
-      return { success: true, data: { sessionToken: existing.value } };
+      // Verify the session still exists and is valid
+      const guest = await db.query.guests.findFirst({
+        where: and(
+          eq(guests.sessionToken, existing.value),
+          lt(guests.expiresAt, new Date())
+        ),
+      });
+
+      if (guest) {
+        return { success: true, data: { sessionToken: existing.value } };
+      }
     }
 
     const sessionToken = randomUUID();
@@ -71,9 +92,26 @@ export async function guestSession(): Promise<{ sessionToken: string | null }> {
     }
 
     const now = new Date();
-    await db
-      .delete(guests)
-      .where(and(eq(guests.sessionToken, token), lt(guests.expiresAt, now)));
+
+    // Check if session is valid before returning
+    const validGuest = await db.query.guests.findFirst({
+      where: and(eq(guests.sessionToken, token), lt(guests.expiresAt, now)),
+    });
+
+    if (!validGuest) {
+      // Clean up invalid session
+      cookieStore.delete("guest_session");
+      await db
+        .delete(guests)
+        .where(eq(guests.sessionToken, token))
+        .catch(() => {}); // Ignore errors on cleanup
+      return { sessionToken: null };
+    }
+
+    // Clean up expired sessions (async, don't wait)
+    db.delete(guests)
+      .where(lt(guests.expiresAt, now))
+      .catch(() => {}); // Ignore errors on cleanup
 
     return { sessionToken: token };
   } catch (error) {
@@ -117,8 +155,6 @@ export async function signUp(
       headers: await headers(),
     });
 
-    console.log("Sign up response:", res);
-
     if (!res.user) {
       return {
         success: false,
@@ -135,11 +171,12 @@ export async function signUp(
         userId: res.user.id,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Sign up error:", error);
 
     // Handle common errors
-    const errorMessage = error?.message || error?.body?.message || "";
+    const errorMessage =
+      error instanceof Error ? error.message : extractErrorBodyMessage(error);
 
     if (
       errorMessage.includes("already exists") ||
@@ -199,8 +236,6 @@ export async function signIn(
       headers: await headers(),
     });
 
-    console.log("Sign in response:", res);
-
     if (!res.user) {
       return { success: false, error: "Invalid email or password." };
     }
@@ -214,11 +249,12 @@ export async function signIn(
         userId: res.user.id,
       },
     };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("Sign in error:", error);
 
     // Handle common errors
-    const errorMessage = error?.message || error?.body?.message || "";
+    const errorMessage =
+      error instanceof Error ? error.message : extractErrorBodyMessage(error);
 
     if (
       errorMessage.includes("credentials") ||
@@ -305,7 +341,10 @@ async function migrateGuestToUser(): Promise<void> {
 
     if (!token) return;
 
+    // Delete guest session from database
     await db.delete(guests).where(eq(guests.sessionToken, token));
+
+    // Delete guest cookie
     cookieStore.delete("guest_session");
   } catch (error) {
     console.error("Failed to migrate guest data:", error);

@@ -5,72 +5,11 @@ import Image from "next/image";
 import { signOut } from "@/lib/auth/actions";
 import { cancelOrder } from "@/lib/profile/actions";
 import { useRouter } from "next/navigation";
-
-// ProfilePage.tsx
-
-type User = {
-  id: string;
-  name: string | null;
-  email: string;
-  image: string | null | undefined; // Changed from 'string | null'
-  emailVerified?: Date | null;
-  createdAt?: Date;
-  updatedAt?: Date;
-};
-
-type Address = {
-  id: string;
-  // Updated fields to match the incoming data structure
-  userId: string;
-  type: "billing" | "shipping";
-  line1: string; // Replaces 'street'
-  line2: string | null;
-  city: string;
-  state: string;
-  country: string;
-  postalCode: string; // Replaces 'zipCode'
-  isDefault: boolean;
-};
-
-// The Order type remains largely the same, but the 'shippingAddress' will now correctly use the updated 'Address' type.
-type Order = {
-  id: string;
-  status: "pending" | "paid" | "shipped" | "delivered" | "cancelled";
-  totalAmount: string;
-  createdAt: Date;
-  shippingAddress: Address | null; // This now correctly uses the new Address type
-  items: OrderItem[];
-};
-
-type OrderItem = {
-  id: string;
-  quantity: number;
-  priceAtPurchase: string;
-  product: {
-    id: string;
-    name: string;
-    description: string | null;
-  } | null;
-  variant: {
-    id: string;
-    price: string;
-    salePrice: string | null;
-    sku: string;
-  } | null;
-  size: {
-    name: string;
-    value: string | null;
-  } | null;
-  color: {
-    name: string;
-    hex: string | null;
-  } | null;
-  imageUrl: string | null;
-};
+import { User, ProfileOrder, Address, OrderStatus } from "@/lib/types/orders";
 
 type ProfilePageProps = {
   user: User;
-  orders: Order[];
+  orders: ProfileOrder[];
   addresses: Address[];
 };
 
@@ -99,15 +38,15 @@ export default function ProfilePage({
     }
   };
 
-  const formatDate = (date: Date) => {
-    return new Date(date).toLocaleDateString("en-US", {
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString("en-US", {
       day: "2-digit",
       month: "short",
       year: "numeric",
     });
   };
 
-  const getStatusColor = (status: Order["status"]) => {
+  const getStatusColor = (status: OrderStatus) => {
     switch (status) {
       case "delivered":
         return "text-green-600";
@@ -123,14 +62,15 @@ export default function ProfilePage({
     }
   };
 
-  const getStatusText = (status: Order["status"], createdAt: Date) => {
+  const getStatusText = (status: OrderStatus, createdAt: string) => {
+    const date = new Date(createdAt);
     if (status === "delivered") {
       return `Delivered on ${formatDate(createdAt)}`;
     }
     if (status === "shipped") {
-      const estimatedDate = new Date(createdAt);
+      const estimatedDate = new Date(date);
       estimatedDate.setDate(estimatedDate.getDate() + 7);
-      return `Estimated arrival ${formatDate(estimatedDate)}`;
+      return `Estimated arrival ${formatDate(estimatedDate.toISOString())}`;
     }
     return status.charAt(0).toUpperCase() + status.slice(1);
   };
@@ -256,7 +196,7 @@ export default function ProfilePage({
                         {item.product?.name || "Unknown Product"}
                       </h3>
                       <p className="text-gray-600 text-sm mb-2">
-                        {item.product?.description || "Men's Shoes"}
+                        {item.product?.description || ""}
                       </p>
                       <div className="flex gap-6 text-sm text-gray-600">
                         <span>Size {item.size?.name || "N/A"}</span>
@@ -383,11 +323,31 @@ export default function ProfilePage({
                 key={address.id}
                 className="bg-gray-50 rounded-lg p-6 hover:shadow-md transition-shadow"
               >
-                <p className="font-medium mb-2">{address.line1}</p>
-                <p className="text-gray-600">
-                  {address.city}, {address.state} {address.postalCode}
-                </p>
-                <p className="text-gray-600">{address.country}</p>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="text-sm font-medium text-gray-500 uppercase">
+                        {address.type}
+                      </span>
+                      {address.isDefault && (
+                        <span className="text-xs bg-dark-900 text-white px-2 py-1 rounded">
+                          Default
+                        </span>
+                      )}
+                    </div>
+                    <p className="font-medium mb-1">{address.line1}</p>
+                    {address.line2 && (
+                      <p className="text-gray-600 text-sm">{address.line2}</p>
+                    )}
+                    <p className="text-gray-600">
+                      {address.city}, {address.state} {address.postalCode}
+                    </p>
+                    <p className="text-gray-600">{address.country}</p>
+                  </div>
+                  <button className="text-sm text-dark-900 hover:underline">
+                    Edit
+                  </button>
+                </div>
               </div>
             ))
           )}

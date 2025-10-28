@@ -45,7 +45,14 @@ async function getOrCreateActiveCart(): Promise<{ cartId: string } | null> {
 
   // Guest flow
   const { sessionToken } = await guestSession();
-  const token = sessionToken ?? (await createGuestSession()).sessionToken;
+  // If we don't have a session token, try to create one using createGuestSession
+  let token: string | null = sessionToken ?? null;
+  if (!token) {
+    const created = await createGuestSession();
+    if (created.success && created.data?.sessionToken) {
+      token = created.data.sessionToken;
+    }
+  }
   if (!token) return null;
 
   const guest = await db.query.guests.findFirst({
@@ -66,7 +73,13 @@ async function getOrCreateActiveCart(): Promise<{ cartId: string } | null> {
 
 export async function getCart(): Promise<CartWithItems> {
   const base = await getOrCreateActiveCart();
-  if (!base) return { id: "", items: [], createdAt: new Date(), updatedAt: new Date() } as unknown as CartWithItems;
+  if (!base)
+    return {
+      id: "",
+      items: [],
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as unknown as CartWithItems;
 
   // Subquery to pick exactly one image per product (primary > sortOrder)
   const pi = db
@@ -74,7 +87,7 @@ export async function getCart(): Promise<CartWithItems> {
       productId: productImages.productId,
       url: productImages.url,
       rn: sql<number>`row_number() over (partition by ${productImages.productId} order by ${productImages.isPrimary} desc, ${productImages.sortOrder} asc, ${productImages.id} asc)`.as(
-        "rn",
+        "rn"
       ),
     })
     .from(productImages)
@@ -94,7 +107,10 @@ export async function getCart(): Promise<CartWithItems> {
       imageUrl: pi.url,
     })
     .from(cartItems)
-    .leftJoin(productVariants, eq(cartItems.productVariantId, productVariants.id))
+    .leftJoin(
+      productVariants,
+      eq(cartItems.productVariantId, productVariants.id)
+    )
     .leftJoin(products, eq(productVariants.productId, products.id))
     .leftJoin(pi, and(eq(pi.productId, products.id), eq(pi.rn, 1)))
     .where(eq(cartItems.cartId, base.cartId));
@@ -125,7 +141,10 @@ export async function addCartItem(variantId: string, quantity = 1) {
   if (!cart) return { ok: false } as const;
 
   const existing = await db.query.cartItems.findFirst({
-    where: and(eq(cartItems.cartId, cart.cartId), eq(cartItems.productVariantId, variantId)),
+    where: and(
+      eq(cartItems.cartId, cart.cartId),
+      eq(cartItems.productVariantId, variantId)
+    ),
   });
 
   if (existing) {
@@ -134,7 +153,9 @@ export async function addCartItem(variantId: string, quantity = 1) {
       .set({ quantity: existing.quantity + quantity })
       .where(eq(cartItems.id, existing.id));
   } else {
-    await db.insert(cartItems).values({ cartId: cart.cartId, productVariantId: variantId, quantity });
+    await db
+      .insert(cartItems)
+      .values({ cartId: cart.cartId, productVariantId: variantId, quantity });
   }
   return { ok: true } as const;
 }
@@ -165,22 +186,38 @@ export async function mergeGuestCartWithUserCart() {
   const token = (await cookieStore).get("guest_session")?.value;
   if (!token) return { ok: true } as const;
 
-  const guest = await db.query.guests.findFirst({ where: eq(guests.sessionToken, token) });
+  const guest = await db.query.guests.findFirst({
+    where: eq(guests.sessionToken, token),
+  });
   if (!guest) return { ok: true } as const;
 
-  const guestCart = await db.query.carts.findFirst({ where: eq(carts.guestId, guest.id) });
+  const guestCart = await db.query.carts.findFirst({
+    where: eq(carts.guestId, guest.id),
+  });
   if (!guestCart) return { ok: true } as const;
 
-  const userCart = await db.query.carts.findFirst({ where: eq(carts.userId, session.user.id) });
+  const userCart = await db.query.carts.findFirst({
+    where: eq(carts.userId, session.user.id),
+  });
   const targetCartId = userCart
     ? userCart.id
-    : (await db.insert(carts).values({ userId: session.user.id }).returning({ id: carts.id }))[0].id;
+    : (
+        await db
+          .insert(carts)
+          .values({ userId: session.user.id })
+          .returning({ id: carts.id })
+      )[0].id;
 
   if (guestCart.id !== targetCartId) {
-    const guestItems = await db.query.cartItems.findMany({ where: eq(cartItems.cartId, guestCart.id) });
+    const guestItems = await db.query.cartItems.findMany({
+      where: eq(cartItems.cartId, guestCart.id),
+    });
     for (const gi of guestItems) {
       const existing = await db.query.cartItems.findFirst({
-        where: and(eq(cartItems.cartId, targetCartId), eq(cartItems.productVariantId, gi.productVariantId)),
+        where: and(
+          eq(cartItems.cartId, targetCartId),
+          eq(cartItems.productVariantId, gi.productVariantId)
+        ),
       });
       if (existing) {
         await db
@@ -188,7 +225,13 @@ export async function mergeGuestCartWithUserCart() {
           .set({ quantity: existing.quantity + gi.quantity })
           .where(eq(cartItems.id, existing.id));
       } else {
-        await db.insert(cartItems).values({ cartId: targetCartId, productVariantId: gi.productVariantId, quantity: gi.quantity });
+        await db
+          .insert(cartItems)
+          .values({
+            cartId: targetCartId,
+            productVariantId: gi.productVariantId,
+            quantity: gi.quantity,
+          });
       }
     }
     await db.delete(carts).where(eq(carts.id, guestCart.id));
@@ -197,5 +240,3 @@ export async function mergeGuestCartWithUserCart() {
   (await cookieStore).delete("guest_session");
   return { ok: true } as const;
 }
-
-

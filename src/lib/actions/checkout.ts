@@ -3,7 +3,6 @@
 import { stripe } from "@/lib/stripe/client";
 import { db } from "@/lib/db";
 import {
-  carts,
   cartItems,
   productVariants,
   products,
@@ -88,7 +87,7 @@ export async function createStripeCheckoutSession(cartId: string) {
           try {
             new URL(item.imageUrl);
             images.push(item.imageUrl);
-          } catch (urlError) {
+          } catch {
             console.warn(
               `Item ${index + 1}: Invalid image URL - ${item.imageUrl}`
             );
@@ -161,7 +160,7 @@ export async function createStripeCheckoutSession(cartId: string) {
     try {
       new URL(baseUrl);
       console.log("Base URL is valid:", baseUrl);
-    } catch (urlError) {
+    } catch {
       console.error("Invalid base URL format:", baseUrl);
       throw new Error(
         `Invalid base URL format: ${baseUrl}. Must be a valid URL starting with http:// or https://`
@@ -227,7 +226,7 @@ export async function createStripeCheckoutSession(cartId: string) {
     try {
       new URL(checkoutSession.url);
       console.log("Checkout URL is valid:", checkoutSession.url);
-    } catch (urlError) {
+    } catch {
       console.error("Invalid URL format:", checkoutSession.url);
       throw new Error(`Invalid URL format: ${checkoutSession.url}`);
     }

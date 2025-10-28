@@ -1,7 +1,7 @@
 import { neon } from "@neondatabase/serverless";
 import { drizzle } from "drizzle-orm/neon-http";
 import * as schema from "@/lib/db/schema";
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { promises as fs } from "fs";
 import path from "path";
 import * as dotenv from "dotenv";
@@ -11,9 +11,11 @@ dotenv.config({ path: ".env.local" });
 const sql = neon(process.env.DATABASE_URL!);
 const db = drizzle(sql, { schema });
 
-
 function slugify(input: string) {
-  return input.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)+/g, "");
+  return input
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)+/g, "");
 }
 
 async function seedFiltersAndBrand() {
@@ -38,7 +40,10 @@ async function seedFiltersAndBrand() {
     { name: "Grey", slug: "grey", hexCode: "#808080" },
   ];
   for (const c of colorsData) {
-    await db.insert(schema.colors).values(c).onConflictDoNothing({ target: schema.colors.slug });
+    await db
+      .insert(schema.colors)
+      .values(c)
+      .onConflictDoNothing({ target: schema.colors.slug });
   }
 
   const sizesData = ["XS", "S", "M", "L", "XL", "XXL"].map((name, i) => ({
@@ -47,11 +52,21 @@ async function seedFiltersAndBrand() {
     sortOrder: i,
   }));
   for (const s of sizesData) {
-    await db.insert(schema.sizes).values(s).onConflictDoNothing({ target: schema.sizes.slug });
+    await db
+      .insert(schema.sizes)
+      .values(s)
+      .onConflictDoNothing({ target: schema.sizes.slug });
   }
 
-  const brand = { name: "Nike", slug: "nike", logoUrl: null as unknown as string | null };
-  await db.insert(schema.brands).values(brand).onConflictDoNothing({ target: schema.brands.slug });
+  const brand = {
+    name: "Nike",
+    slug: "nike",
+    logoUrl: null as unknown as string | null,
+  };
+  await db
+    .insert(schema.brands)
+    .values(brand)
+    .onConflictDoNothing({ target: schema.brands.slug });
 }
 
 async function seedCategoriesAndCollections() {
@@ -81,42 +96,101 @@ async function seedCategoriesAndCollections() {
 }
 
 async function pickIds() {
-  const [brand] = await db.select().from(schema.brands).where(eq(schema.brands.slug, "nike"));
+  const [brand] = await db
+    .select()
+    .from(schema.brands)
+    .where(eq(schema.brands.slug, "nike"));
   const cats = await db.select().from(schema.categories);
   const gens = await db.select().from(schema.genders);
   const cols = await db.select().from(schema.colors);
-  const sizs = await db.select().from(schema.sizes);
-  return { brand, cats, gens, cols, sizs };
+  const sizes = await db.select().from(schema.sizes);
+  return { brand, cats, gens, cols, sizes };
 }
 
 async function seedProductsWithVariantsAndImages() {
   const shoesSrcDir = path.join(process.cwd(), "public", "shoes");
 
-  const { brand, cats, gens, cols, sizs } = await pickIds();
-  if (!brand || cats.length === 0 || gens.length === 0 || cols.length === 0 || sizs.length === 0) {
+  const { brand, cats, gens, cols, sizes } = await pickIds();
+  if (
+    !brand ||
+    cats.length === 0 ||
+    gens.length === 0 ||
+    cols.length === 0 ||
+    sizes.length === 0
+  ) {
     throw new Error("Missing seed prerequisites.");
   }
 
   const shoeFiles = await fs.readdir(shoesSrcDir);
-  const selected = shoeFiles.filter(f => /(shoe|sneaker|trending)/i.test(f)).slice(0, 15);
+  const selected = shoeFiles
+    .filter((f) => /(shoe|sneaker|trending)/i.test(f))
+    .slice(0, 15);
 
   // Create 15 unique product names with distinct characteristics
   const productData = [
-    { name: "Nike Air Max 270", description: "Max Air cushioning for all-day comfort and style." },
-    { name: "Nike Air Force 1 '07", description: "The radiance lives on in the Air Force 1 '07, the basketball original." },
-    { name: "Nike Dunk Low", description: "The Nike Dunk Low delivers bold style and comfort for everyday wear." },
-    { name: "Nike Blazer Mid '77", description: "The Nike Blazer Mid '77 delivers bold style and comfort." },
-    { name: "Nike Air Max 90", description: "The Nike Air Max 90 stays true to its OG running roots." },
-    { name: "Nike React Element 55", description: "The Nike React Element 55 delivers bold style and comfort." },
-    { name: "Nike Air VaporMax Plus", description: "The Nike Air VaporMax Plus delivers bold style and comfort." },
-    { name: "Nike Air Max 97", description: "The Nike Air Max 97 delivers bold style and comfort." },
-    { name: "Nike Air Max 95", description: "The Nike Air Max 95 delivers bold style and comfort." },
-    { name: "Nike Air Max 98", description: "The Nike Air Max 98 delivers bold style and comfort." },
-    { name: "Nike Air Max 96", description: "The Nike Air Max 96 delivers bold style and comfort." },
-    { name: "Nike Air Max 94", description: "The Nike Air Max 94 delivers bold style and comfort." },
-    { name: "Nike Air Max 93", description: "The Nike Air Max 93 delivers bold style and comfort." },
-    { name: "Nike Air Max 92", description: "The Nike Air Max 92 delivers bold style and comfort." },
-    { name: "Nike Air Max 91", description: "The Nike Air Max 91 delivers bold style and comfort." }
+    {
+      name: "Nike Air Max 270",
+      description: "Max Air cushioning for all-day comfort and style.",
+    },
+    {
+      name: "Nike Air Force 1 '07",
+      description:
+        "The radiance lives on in the Air Force 1 '07, the basketball original.",
+    },
+    {
+      name: "Nike Dunk Low",
+      description:
+        "The Nike Dunk Low delivers bold style and comfort for everyday wear.",
+    },
+    {
+      name: "Nike Blazer Mid '77",
+      description: "The Nike Blazer Mid '77 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 90",
+      description: "The Nike Air Max 90 stays true to its OG running roots.",
+    },
+    {
+      name: "Nike React Element 55",
+      description: "The Nike React Element 55 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air VaporMax Plus",
+      description:
+        "The Nike Air VaporMax Plus delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 97",
+      description: "The Nike Air Max 97 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 95",
+      description: "The Nike Air Max 95 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 98",
+      description: "The Nike Air Max 98 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 96",
+      description: "The Nike Air Max 96 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 94",
+      description: "The Nike Air Max 94 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 93",
+      description: "The Nike Air Max 93 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 92",
+      description: "The Nike Air Max 92 delivers bold style and comfort.",
+    },
+    {
+      name: "Nike Air Max 91",
+      description: "The Nike Air Max 91 delivers bold style and comfort.",
+    },
   ];
 
   for (let i = 0; i < productData.length; i++) {
@@ -133,16 +207,24 @@ async function seedProductsWithVariantsAndImages() {
       isPublished: true,
     } satisfies schema.InsertProduct;
 
-    const [created] = await db.insert(schema.products).values(product).returning();
+    const [created] = await db
+      .insert(schema.products)
+      .values(product)
+      .returning();
 
     const variantCount = 2 + Math.floor(Math.random() * 3); // 2-4 variants
-    const chosenColors = [...cols].sort(() => 0.5 - Math.random()).slice(0, variantCount);
+    const chosenColors = [...cols]
+      .sort(() => 0.5 - Math.random())
+      .slice(0, variantCount);
 
     for (const color of chosenColors) {
-      const chosenSizes = [...sizs].sort(() => 0.5 - Math.random()).slice(2, 5);
+      const chosenSizes = [...sizes]
+        .sort(() => 0.5 - Math.random())
+        .slice(2, 5);
       for (const size of chosenSizes) {
         const price = (80 + Math.floor(Math.random() * 100)).toFixed(2);
-        const sale = Math.random() > 0.6 ? (Number(price) - 10).toFixed(2) : null;
+        const sale =
+          Math.random() > 0.6 ? (Number(price) - 10).toFixed(2) : null;
         const variant = {
           productId: created.id,
           sku: `${slugify(name)}-${color.slug}-${size.slug}`.slice(0, 90),
@@ -154,14 +236,17 @@ async function seedProductsWithVariantsAndImages() {
           weight: 0.75,
           dimensions: { length: 30, width: 12, height: 10 },
         } satisfies schema.InsertVariant;
-        const [v] = await db.insert(schema.productVariants).values(variant).returning();
+        const [v] = await db
+          .insert(schema.productVariants)
+          .values(variant)
+          .returning();
 
         // Attach 1-2 images per variant
         for (let k = 0; k < 2; k++) {
           // Use the product index to ensure each product gets a unique image
           const imageIndex = i % selected.length;
           const imageFileName = selected[imageIndex];
-          
+
           await db.insert(schema.productImages).values({
             productId: created.id,
             variantId: v.id,

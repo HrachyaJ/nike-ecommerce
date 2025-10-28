@@ -44,7 +44,7 @@ export default function Footer() {
                   href="/products/e7eb0483-1a8f-4a48-97ed-19eb4208a654"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Blazer Mid '77
+                  Blazer Mid &apos;77
                 </Link>
               </li>
               <li>
@@ -138,7 +138,7 @@ export default function Footer() {
 
           {/* Kids Column */}
           <div className="lg:col-span-1">
-            <h3 className="text-lg font-semibold mb-4">Kids'</h3>
+            <h3 className="text-lg font-semibold mb-4">Kids&apos;</h3>
             <ul className="space-y-2">
               <li>
                 <Link
@@ -153,7 +153,7 @@ export default function Footer() {
                   href="/kids/shoes"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Kids' Shoes
+                  Kids&apos; Shoes
                 </Link>
               </li>
               <li>
@@ -161,7 +161,7 @@ export default function Footer() {
                   href="/kids/jordan"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Kids' Jordan Shoes
+                  Kids&apos; Jordan Shoes
                 </Link>
               </li>
               <li>
@@ -169,7 +169,7 @@ export default function Footer() {
                   href="/kids/basketball"
                   className="text-gray-400 hover:text-white transition-colors duration-200 text-sm"
                 >
-                  Kids' Basketball Shoes
+                  Kids&apos; Basketball Shoes
                 </Link>
               </li>
             </ul>

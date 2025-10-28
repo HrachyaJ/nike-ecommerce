@@ -7,7 +7,7 @@ type AuthFormProps = {
   variant: "sign-in" | "sign-up";
   onSubmit: (
     formData: FormData
-  ) => Promise<{ success: boolean; error?: string; data?: any }>;
+  ) => Promise<{ success: boolean; error?: string; data?: unknown }>;
 };
 
 export default function AuthForm({ variant, onSubmit }: AuthFormProps) {

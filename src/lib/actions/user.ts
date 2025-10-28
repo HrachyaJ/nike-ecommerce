@@ -24,7 +24,7 @@ export async function updateProfile(data: z.infer<typeof updateProfileSchema>) {
   return { success: true };
 }
 
-type UserPreferences = {
+export type UserPreferences = {
   marketingEmails: boolean;
   orderUpdates: boolean;
   newsAndOffers: boolean;
@@ -32,10 +32,7 @@ type UserPreferences = {
   currency: string;
 };
 
-export async function updateUserPreferences(
-  userId: string,
-  preferences: UserPreferences
-) {
+export async function updateUserPreferences() {
   // Store preferences in the database
   // You might want to create a new table for user preferences
   return { success: true };

@@ -12,15 +12,17 @@ const sql = neon(process.env.DATABASE_URL!);
 export const db = drizzle(sql, { schema });
 
 // Add type-safe queries
-import { orders, productImages } from "./schema";
 export const queries = {
   orders: {
-    findFirst: async (options: any) => db.query.orders.findFirst(options),
+    findFirst: async (
+      options?: Parameters<typeof db.query.orders.findFirst>[0]
+    ) => db.query.orders.findFirst(options),
     // Add more type-safe queries as needed
   },
   productImages: {
-    findFirst: async (options: any) =>
-      db.query.productImages.findFirst(options),
+    findFirst: async (
+      options?: Parameters<typeof db.query.productImages.findFirst>[0]
+    ) => db.query.productImages.findFirst(options),
     // Add more type-safe queries as needed
   },
 };

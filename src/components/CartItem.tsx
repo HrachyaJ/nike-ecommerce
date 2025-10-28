@@ -29,7 +29,7 @@ export default function CartItem({ item }: { item: CartLine }) {
         <div className="flex justify-between items-start">
           <div>
             <p className="text-body-medium">{item.variant.product.name}</p>
-            <p className="text-dark-700 text-sm mt-1">Men's Shoes</p>
+            <p className="text-dark-700 text-sm mt-1">Men&apos;s Shoes</p>
             <div className="flex items-center gap-6 mt-3">
               <div className="text-sm">Size 10</div>
               <div className="flex items-center gap-2">
@@ -37,7 +37,11 @@ export default function CartItem({ item }: { item: CartLine }) {
                 <div className="flex items-center gap-3 bg-light-200 px-3 py-1 rounded-full">
                   <button
                     className="p-1"
-                    onClick={() => updateQty(item.id, Math.max(1, item.quantity - 1))}
+                    onClick={() =>
+                      // item.id may be undefined for transient client state; guard before calling
+                      item.id &&
+                      updateQty(item.id, Math.max(1, item.quantity - 1))
+                    }
                     aria-label="Decrease quantity"
                   >
                     <Minus size={16} />
@@ -45,7 +49,9 @@ export default function CartItem({ item }: { item: CartLine }) {
                   <span>{item.quantity}</span>
                   <button
                     className="p-1"
-                    onClick={() => updateQty(item.id, item.quantity + 1)}
+                    onClick={() =>
+                      item.id && updateQty(item.id, item.quantity + 1)
+                    }
                     aria-label="Increase quantity"
                   >
                     <Plus size={16} />
@@ -56,7 +62,11 @@ export default function CartItem({ item }: { item: CartLine }) {
           </div>
           <div className="flex flex-col items-end gap-4">
             <span className="text-body-medium">${lineTotal}</span>
-            <button className="text-red" onClick={() => remove(item.id)} aria-label="Remove">
+            <button
+              className="text-red"
+              onClick={() => item.id && remove(item.id)}
+              aria-label="Remove"
+            >
               <Trash2 size={18} />
             </button>
           </div>
@@ -65,6 +75,3 @@ export default function CartItem({ item }: { item: CartLine }) {
     </div>
   );
 }
-
-
-

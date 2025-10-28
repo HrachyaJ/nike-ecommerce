@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const GENDER = ["men", "women", "kids"] as const;
+const GENDER = ["Men", "Women", "Kids"] as const;
 const SIZES = ["5", "6", "7", "8", "9", "10", "11"];
 const COLORS = ["white", "black", "red", "blue", "navy"];
 const PRICE = ["0-50", "50-100", "100-150", "150+"];
@@ -18,38 +18,38 @@ export default function Filters() {
   const onToggle = (key: string, value: string) => {
     const current = new URLSearchParams(searchParams.toString());
     const currentValues = current.getAll(key);
-    
+
     if (currentValues.includes(value)) {
       // Remove the value
       current.delete(key);
       currentValues
-        .filter(v => v !== value)
-        .forEach(v => current.append(key, v));
+        .filter((v) => v !== value)
+        .forEach((v) => current.append(key, v));
     } else {
       // Add the value
       current.append(key, value);
     }
-    
+
     // Reset page to 1 when filters change
-    current.delete('page');
-    
+    current.delete("page");
+
     const search = current.toString();
-    const query = search ? `?${search}` : '';
-    
+    const query = search ? `?${search}` : "";
+
     router.push(`${pathname}${query}`, { scroll: false });
   };
 
   const onClearAll = () => {
     const current = new URLSearchParams(searchParams.toString());
-    
+
     // Remove filter parameters but keep sort and other non-filter params
-    ['gender', 'size', 'color', 'price'].forEach(key => {
+    ["gender", "size", "color", "price"].forEach((key) => {
       current.delete(key);
     });
-    
+
     const search = current.toString();
-    const query = search ? `?${search}` : '';
-    
+    const query = search ? `?${search}` : "";
+
     router.push(`${pathname}${query}`, { scroll: false });
   };
 
@@ -60,13 +60,19 @@ export default function Filters() {
 
   // Check if any filters are active
   const hasActiveFilters = useMemo(() => {
-    return ['gender', 'size', 'color', 'price'].some(key => {
+    return ["gender", "size", "color", "price"].some((key) => {
       const values = searchParams.getAll(key);
       return values.length > 0;
     });
   }, [searchParams]);
 
-  const Section = ({ title, children }: { title: string; children: React.ReactNode }) => (
+  const Section = ({
+    title,
+    children,
+  }: {
+    title: string;
+    children: React.ReactNode;
+  }) => (
     <div className="border-b border-light-300 py-4 last:border-b-0">
       <h3 className="text-sm font-medium mb-3">{title}</h3>
       {children}
@@ -79,8 +85,8 @@ export default function Filters() {
       disabled={!hasActiveFilters}
       className={`text-sm underline cursor-pointer mb-3 text-muted-foreground ${
         hasActiveFilters
-          ? 'cursor-pointer text-muted-foreground'
-          : 'cursor-not-allowed text-muted-foreground'
+          ? "cursor-pointer text-muted-foreground"
+          : "cursor-not-allowed text-muted-foreground"
       }`}
     >
       Clear All
@@ -97,7 +103,10 @@ export default function Filters() {
       <Section title="Gender">
         <div className="grid grid-cols-2 gap-2">
           {GENDER.map((g) => (
-            <label key={g} className="flex items-center gap-2 text-sm cursor-pointer">
+            <label
+              key={g}
+              className="flex items-center gap-2 text-sm cursor-pointer"
+            >
               <input
                 type="checkbox"
                 className="accent-dark-900"
@@ -113,7 +122,10 @@ export default function Filters() {
       <Section title="Size">
         <div className="grid grid-cols-4 gap-2">
           {SIZES.map((s) => (
-            <label key={s} className="flex items-center gap-2 text-sm cursor-pointer">
+            <label
+              key={s}
+              className="flex items-center gap-2 text-sm cursor-pointer"
+            >
               <input
                 type="checkbox"
                 className="accent-dark-900"
@@ -129,7 +141,10 @@ export default function Filters() {
       <Section title="Color">
         <div className="grid grid-cols-3 gap-2">
           {COLORS.map((c) => (
-            <label key={c} className="flex items-center gap-2 text-sm cursor-pointer">
+            <label
+              key={c}
+              className="flex items-center gap-2 text-sm cursor-pointer"
+            >
               <input
                 type="checkbox"
                 className="accent-dark-900"
@@ -145,14 +160,19 @@ export default function Filters() {
       <Section title="Price">
         <div className="grid grid-cols-2 gap-2">
           {PRICE.map((p) => (
-            <label key={p} className="flex items-center gap-2 text-sm cursor-pointer">
+            <label
+              key={p}
+              className="flex items-center gap-2 text-sm cursor-pointer"
+            >
               <input
                 type="checkbox"
                 className="accent-dark-900"
                 checked={isChecked("price", p)}
                 onChange={() => onToggle("price", p)}
               />
-              <span>{p === "150+" ? "$150+" : `$${p.replace("-", " - $")}`}</span>
+              <span>
+                {p === "150+" ? "$150+" : `$${p.replace("-", " - $")}`}
+              </span>
             </label>
           ))}
         </div>
@@ -191,7 +211,13 @@ export default function Filters() {
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="text-base font-medium">Filters</h2>
-              <button className="text-sm underline cursor-pointer" onClick={() => setOpen(false)} aria-label="Close filters">Close</button>
+              <button
+                className="text-sm underline cursor-pointer"
+                onClick={() => setOpen(false)}
+                aria-label="Close filters"
+              >
+                Close
+              </button>
             </div>
             {content}
           </aside>

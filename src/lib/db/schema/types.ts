@@ -1,4 +1,4 @@
-import { timestamp, pgTable } from "drizzle-orm/pg-core";
+import { timestamp } from "drizzle-orm/pg-core";
 
 // Base timestamp columns for all tables
 export const baseTimestampColumns = {

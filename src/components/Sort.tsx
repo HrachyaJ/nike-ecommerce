@@ -24,7 +24,7 @@ export default function Sort() {
     startTransition(() => {
       try {
         // First set the sort parameter
-        let newUrl = setParam(
+        const newUrl = setParam(
           pathname,
           searchParams.toString(),
           "sort",

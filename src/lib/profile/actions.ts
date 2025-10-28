@@ -8,6 +8,8 @@ import {
   products,
   productVariants,
   productImages,
+  colors,
+  sizes,
   users,
 } from "@/lib/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
@@ -54,8 +56,30 @@ export async function getUserOrders() {
             id: orderItems.id,
             quantity: orderItems.quantity,
             priceAtPurchase: orderItems.priceAtPurchase,
-            product: products,
-            variant: productVariants,
+            product: {
+              id: products.id,
+              name: products.name,
+              description: products.description,
+              // use primary image from pi
+              imageUrl: pi.url,
+            },
+            variant: {
+              id: productVariants.id,
+              sku: productVariants.sku,
+              price: productVariants.price,
+              salePrice: productVariants.salePrice,
+            },
+            size: {
+              id: sizes.id,
+              name: sizes.name,
+              // sizes table doesn't have a 'value' column; set to NULL so type becomes null
+              value: sql`NULL`,
+            },
+            color: {
+              id: colors.id,
+              name: colors.name,
+              hex: colors.hexCode,
+            },
             imageUrl: pi.url,
           })
           .from(orderItems)
@@ -64,19 +88,66 @@ export async function getUserOrders() {
             eq(orderItems.productVariantId, productVariants.id)
           )
           .leftJoin(products, eq(productVariants.productId, products.id))
+          .leftJoin(colors, eq(productVariants.colorId, colors.id))
+          .leftJoin(sizes, eq(productVariants.sizeId, sizes.id))
           .leftJoin(pi, and(eq(pi.productId, products.id), eq(pi.rn, 1)))
           .where(eq(orderItems.orderId, order.id));
 
         return {
           ...order,
-          items: items.map((item) => ({
-            id: item.id,
-            quantity: item.quantity,
-            priceAtPurchase: item.priceAtPurchase,
-            product: item.product,
-            variant: item.variant,
-            imageUrl: item.imageUrl,
-          })),
+          // serialize createdAt to ISO string for client
+          createdAt:
+            order.createdAt instanceof Date
+              ? order.createdAt.toISOString()
+              : order.createdAt,
+          items: items.map((item) => {
+            const product =
+              item.product && item.product.id
+                ? {
+                    id: item.product.id,
+                    name: item.product.name ?? "",
+                    description: item.product.description ?? null,
+                    imageUrl: item.product.imageUrl ?? null,
+                  }
+                : null;
+
+            const variant =
+              item.variant && item.variant.id
+                ? {
+                    id: item.variant.id,
+                    sku: item.variant.sku ?? "",
+                    price: item.variant.price ?? "",
+                    salePrice: item.variant.salePrice ?? null,
+                  }
+                : null;
+
+            const size =
+              item.size && item.size.id
+                ? {
+                    name: item.size.name ?? "",
+                    value: null,
+                  }
+                : null;
+
+            const color =
+              item.color && item.color.id
+                ? {
+                    name: item.color.name ?? "",
+                    hex: item.color.hex ?? null,
+                  }
+                : null;
+
+            return {
+              id: item.id,
+              quantity: item.quantity,
+              priceAtPurchase: item.priceAtPurchase,
+              product,
+              variant,
+              size,
+              color,
+              imageUrl: item.imageUrl ?? null,
+            };
+          }),
         };
       })
     );

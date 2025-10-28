@@ -3,21 +3,13 @@
 import { useCartStore } from "@/store/cart.store";
 import { createStripeCheckoutSession } from "@/lib/actions/checkout";
 import { useState } from "react";
-import { CreditCard, Loader2, Bug, TestTube, Globe, Zap } from "lucide-react";
+import { CreditCard, Loader2 } from "lucide-react";
 
-export default function CartSummary({
-  isAuthenticated,
-}: {
-  isAuthenticated: boolean;
-}) {
+export default function CartSummary() {
   const subtotal = useCartStore((s) => s.subtotal);
   const cartId = useCartStore((s) => s.id);
   const items = useCartStore((s) => s.items);
   const [isLoading, setIsLoading] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
-  const [isTestingPayment, setIsTestingPayment] = useState(false);
-  const [isTestingUrl, setIsTestingUrl] = useState(false);
-  const [isTestingSimple, setIsTestingSimple] = useState(false);
 
   const delivery = subtotal > 0 ? 2 : 0;
   const total = (subtotal + delivery).toFixed(2);
@@ -40,7 +32,7 @@ export default function CartSummary({
         try {
           new URL(result.url);
           window.location.href = result.url;
-        } catch (urlError) {
+        } catch {
           console.error("Invalid URL:", result.url);
           alert(`Invalid checkout URL: ${result.url}`);
         }

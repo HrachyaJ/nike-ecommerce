@@ -1,5 +1,4 @@
 import { getCart } from "@/lib/actions/cart";
-import { getCurrentUser } from "@/lib/auth/actions";
 import CartItem from "@/components/CartItem";
 import CartSummary from "@/components/CartSummary";
 
@@ -24,7 +23,7 @@ export const dynamic = "force-dynamic";
 // }
 
 export default async function CartPage() {
-  const [cart, user] = await Promise.all([getCart(), getCurrentUser()]);
+  const cart = await getCart();
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 pb-47">
@@ -34,13 +33,11 @@ export default async function CartPage() {
           {cart.items.length === 0 ? (
             <p className="text-dark-700">Your cart is empty.</p>
           ) : (
-            cart.items.map((item: any) => (
-              <CartItem key={item.id} item={item} />
-            ))
+            cart.items.map((item) => <CartItem key={item.id} item={item} />)
           )}
         </div>
         <div>
-          <CartSummary isAuthenticated={!!user} />
+          <CartSummary />
         </div>
       </div>
     </div>

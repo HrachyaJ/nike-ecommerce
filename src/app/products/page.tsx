@@ -3,39 +3,58 @@ import Filters from "@/components/Filters";
 import Sort from "@/components/Sort";
 import { getAllProducts } from "@/lib/actions/product";
 import { parseFilterParams } from "@/lib/utils/query";
+import type { Metadata } from "next";
 
 type SearchParams = Record<string, string | string[] | undefined>;
+
+// Generate dynamic metadata based on filters
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const filters = parseFilterParams(sp);
+
+  const titleParts = ["Products"];
+  if (filters.search) titleParts.unshift(filters.search);
+  if (filters.genderSlugs?.[0]) titleParts.push(filters.genderSlugs[0]);
+  if (filters.categorySlugs?.[0]) titleParts.push(filters.categorySlugs[0]);
+
+  return {
+    title: `${titleParts.join(" - ")} | Nike Store`,
+    description: `Shop Nike ${titleParts.join(
+      " "
+    )}. Find your perfect pair from our extensive collection.`,
+  };
+}
 
 function toArray(v: string | string[] | undefined): string[] {
   if (!v) return [];
   return Array.isArray(v) ? v : [v];
 }
 
+function capitalizeFirst(str: string): string {
+  return str.charAt(0).toUpperCase() + str.slice(1);
+}
+
 function buildActiveBadges(params: SearchParams): string[] {
   const badges: string[] = [];
 
   // Gender badges
-  toArray(params.gender).forEach((g) =>
-    badges.push(g.charAt(0).toUpperCase() + g.slice(1))
-  );
+  toArray(params.gender).forEach((g) => badges.push(capitalizeFirst(g)));
 
   // Size badges
   toArray(params.size).forEach((s) => badges.push(`Size: ${s}`));
 
   // Color badges
-  toArray(params.color).forEach((c) =>
-    badges.push(c.charAt(0).toUpperCase() + c.slice(1))
-  );
+  toArray(params.color).forEach((c) => badges.push(capitalizeFirst(c)));
 
   // Brand badges
-  toArray(params.brand).forEach((b) =>
-    badges.push(b.charAt(0).toUpperCase() + b.slice(1))
-  );
+  toArray(params.brand).forEach((b) => badges.push(capitalizeFirst(b)));
 
   // Category badges
-  toArray(params.category).forEach((c) =>
-    badges.push(c.charAt(0).toUpperCase() + c.slice(1))
-  );
+  toArray(params.category).forEach((c) => badges.push(capitalizeFirst(c)));
 
   // Price range badges
   toArray(params.price).forEach((p) => {
@@ -62,14 +81,6 @@ function buildActiveBadges(params: SearchParams): string[] {
   return badges;
 }
 
-function formatPrice(minPrice: number | null, maxPrice: number | null): string {
-  if (minPrice === null && maxPrice === null) return "Price unavailable";
-  if (minPrice === maxPrice) return `$${minPrice}`;
-  if (minPrice === null) return `Up to $${maxPrice}`;
-  if (maxPrice === null) return `From $${minPrice}`;
-  return `$${minPrice} - $${maxPrice}`;
-}
-
 export default async function ProductsPage({
   searchParams,
 }: {
@@ -77,14 +88,8 @@ export default async function ProductsPage({
 }) {
   try {
     const sp = await searchParams;
-
-    // Parse the search parameters using your existing utility
     const filters = parseFilterParams(sp);
-
-    // Fetch products from database
     const { products, totalCount } = await getAllProducts(filters);
-
-    // Build active filter badges
     const activeBadges = buildActiveBadges(sp);
 
     // Add search badge if present
@@ -93,7 +98,7 @@ export default async function ProductsPage({
     }
 
     return (
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pb-8">
         <header className="flex items-center justify-between py-6">
           <h1 className="text-heading-3 text-dark-900">
             Products ({totalCount})
@@ -102,10 +107,15 @@ export default async function ProductsPage({
         </header>
 
         {activeBadges.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-2">
+          <div
+            className="mb-4 flex flex-wrap gap-2"
+            role="list"
+            aria-label="Active filters"
+          >
             {activeBadges.map((badge, index) => (
               <span
                 key={`${badge}-${index}`}
+                role="listitem"
                 className="rounded-full border border-light-300 px-3 py-1 text-caption text-dark-900"
               >
                 {badge}
@@ -115,10 +125,13 @@ export default async function ProductsPage({
         )}
 
         <section className="grid grid-cols-1 gap-6 md:grid-cols-[240px_1fr]">
-          {/* Sticky/Floating Filters Sidebar */}
-          <div className="md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto">
+          {/* Sticky Filters Sidebar */}
+          <aside
+            className="md:sticky md:top-4 md:self-start md:max-h-[calc(100vh-2rem)] md:overflow-y-auto"
+            aria-label="Product filters"
+          >
             <Filters />
-          </div>
+          </aside>
 
           {/* Products Grid */}
           <div>
@@ -134,44 +147,53 @@ export default async function ProductsPage({
                 )}
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-8">
-                {products.map((product) => (
-                  <Card
-                    key={product.id}
-                    title={product.name}
-                    description={product.subtitle || ""}
-                    imageSrc={product.imageUrl || "/placeholder-shoe.jpg"}
-                    price={product.minPrice || 0}
-                    imageAlt={`${product.name} shoe`}
-                    href={`/products/${product.id}`}
-                  />
-                ))}
-              </div>
-            )}
+              <>
+                <div
+                  className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 pb-8"
+                  role="list"
+                  aria-label="Products"
+                >
+                  {products.map((product) => (
+                    <Card
+                      key={product.id}
+                      title={product.name}
+                      description={product.subtitle || ""}
+                      imageSrc={product.imageUrl || "/placeholder-shoe.jpg"}
+                      price={product.minPrice || 0}
+                      imageAlt={`${product.name} shoe`}
+                      href={`/products/${product.id}`}
+                    />
+                  ))}
+                </div>
 
-            {/* Pagination info - you might want to add actual pagination controls */}
-            {totalCount > products.length && (
-              <div className="mt-6 text-center">
-                <p className="text-caption text-dark-500">
-                  Showing {products.length} of {totalCount} products
-                </p>
-              </div>
+                {/* Pagination info */}
+                {totalCount > products.length && (
+                  <div className="mt-6 text-center">
+                    <p className="text-caption text-dark-500">
+                      Showing {products.length} of {totalCount} products
+                    </p>
+                  </div>
+                )}
+              </>
             )}
           </div>
         </section>
-      </main>
+      </div>
     );
   } catch (error) {
     console.error("Error loading products page:", error);
     return (
-      <main className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <div className="rounded-lg border border-red-300 bg-red-50 p-8 text-center">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div
+          className="rounded-lg border border-red-300 bg-red-50 p-8 text-center"
+          role="alert"
+        >
           <p className="text-body text-red-700">
             Sorry, there was an error loading the products. Please try again
             later.
           </p>
         </div>
-      </main>
+      </div>
     );
   }
 }

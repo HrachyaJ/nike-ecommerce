@@ -1,13 +1,9 @@
-import { Suspense } from "react";
+import React from "react";
 import { getOrder, createOrder } from "@/lib/actions/orders";
 import OrderSuccess from "@/components/OrderSuccess";
 import { redirect } from "next/navigation";
-
-interface SuccessPageProps {
-  searchParams: {
-    session_id?: string;
-  };
-}
+import Link from "next/link";
+import { OrderQueryResult, serializeOrder } from "@/lib/types/orders";
 
 async function SuccessContent({ sessionId }: { sessionId: string }) {
   console.log("🚀 Success page loaded with session ID:", sessionId);
@@ -42,12 +38,12 @@ async function SuccessContent({ sessionId }: { sessionId: string }) {
               <li>Check server logs for detailed error information</li>
             </ol>
           </div>
-          <a
+          <Link
             href="/"
             className="inline-block px-6 py-3 bg-dark-900 text-white rounded-full hover:bg-dark-800 transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     );
@@ -59,7 +55,7 @@ async function SuccessContent({ sessionId }: { sessionId: string }) {
 
   console.log("📋 Get order result:", result);
 
-  if (!result.success) {
+  if (!result.success || !result.order) {
     console.error("❌ Order retrieval failed:", result.error);
     return (
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
@@ -74,7 +70,7 @@ async function SuccessContent({ sessionId }: { sessionId: string }) {
             <br />
             Order Created: {createResult.success ? "✅ Yes" : "❌ No"}
             <br />
-            Error: {result.error}
+            Error: {result.error || "Order not found"}
           </p>
           <div className="bg-gray-100 p-4 rounded mb-6 text-left">
             <h3 className="font-bold mb-2">What happened:</h3>
@@ -86,19 +82,25 @@ async function SuccessContent({ sessionId }: { sessionId: string }) {
               Check your server logs for more details about the database query.
             </p>
           </div>
-          <a
+          <Link
             href="/"
             className="inline-block px-6 py-3 bg-dark-900 text-white rounded-full hover:bg-dark-800 transition-colors"
           >
             Back to Home
-          </a>
+          </Link>
         </div>
       </div>
     );
   }
 
   console.log("🎉 Success! Rendering order success page");
-  return <OrderSuccess order={result.order} />;
+
+  // Use the serialization helper to ensure proper typing
+  const serializedOrder = serializeOrder(
+    result.order as unknown as OrderQueryResult
+  );
+
+  return <OrderSuccess order={serializedOrder} />;
 }
 
 function LoadingFallback() {
@@ -117,8 +119,13 @@ function LoadingFallback() {
   );
 }
 
-export default function SuccessPage({ searchParams }: SuccessPageProps) {
-  const sessionId = searchParams.session_id;
+export default async function SuccessPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ session_id?: string }>;
+}) {
+  const params = await searchParams;
+  const sessionId = params?.session_id;
 
   console.log("🔗 Success page params:", { sessionId });
 
@@ -127,11 +134,7 @@ export default function SuccessPage({ searchParams }: SuccessPageProps) {
     redirect("/cart");
   }
 
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <Suspense fallback={<LoadingFallback />}>
-        <SuccessContent sessionId={sessionId} />
-      </Suspense>
-    </div>
-  );
+  const result = await SuccessContent({ sessionId });
+
+  return <div className="min-h-screen bg-gray-50">{result}</div>;
 }

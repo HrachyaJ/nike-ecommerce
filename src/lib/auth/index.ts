@@ -17,8 +17,8 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    requireEmailVerification: false, // This allows sign in without verification
-    autoSignIn: true, // Automatically sign in after sign up
+    requireEmailVerification: false,
+    autoSignIn: true,
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days
@@ -32,7 +32,7 @@ export const auth = betterAuth({
     additionalFields: {
       emailVerified: {
         type: "boolean",
-        defaultValue: false, // Users start unverified but can still sign in
+        defaultValue: false,
         required: false,
       },
     },
@@ -44,6 +44,14 @@ export const auth = betterAuth({
       enabled: false,
     },
   },
-  trustedOrigins: [process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"],
+  trustedOrigins: [
+    process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000",
+    ...(process.env.NODE_ENV === "production"
+      ? []
+      : ["http://localhost:3001", "http://127.0.0.1:3000"]),
+  ],
   plugins: [nextCookies()],
 });
+
+// Export type-safe auth client for use in client components
+export type Auth = typeof auth;

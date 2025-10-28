@@ -19,11 +19,20 @@ export type CartVariant = {
 };
 
 export type CartLine = {
-  id: string;
+  id?: string;
   cartId: string;
   productVariantId: string;
   quantity: number;
-  variant: CartVariant;
+  variant: {
+    id: string;
+    price: string;
+    salePrice: string | null;
+    product: {
+      id: string;
+      name: string;
+    };
+    imageUrl: string | null;
+  };
 };
 
 type CartState = {

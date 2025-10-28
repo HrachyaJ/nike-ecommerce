@@ -1,34 +1,7 @@
-"use client";
-
+import { Order } from "@/lib/types/orders";
 import { CheckCircle, Package, CreditCard, MapPin } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
-interface OrderItem {
-  id: string;
-  quantity: number;
-  priceAtPurchase: string;
-  variant: {
-    id: string;
-    product: {
-      id: string;
-      name: string;
-      imageUrl: string | null;
-    };
-  };
-}
-
-interface Order {
-  id: string;
-  status: string;
-  totalAmount: string;
-  createdAt: string;
-  items: OrderItem[];
-  user?: {
-    name: string;
-    email: string;
-  } | null;
-}
 
 interface OrderSuccessProps {
   order: Order;
@@ -117,10 +90,10 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
               className="flex items-center gap-4 p-4 bg-gray-50 rounded-lg"
             >
               <div className="relative w-16 h-16 bg-white rounded-lg overflow-hidden">
-                {item.variant.product.imageUrl ? (
+                {item.imageUrl ? (
                   <Image
-                    src={item.variant.product.imageUrl}
-                    alt={item.variant.product.name}
+                    src={item.imageUrl}
+                    alt={item.product?.name || "Product"}
                     fill
                     className="object-cover"
                   />
@@ -132,11 +105,21 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
               </div>
               <div className="flex-1">
                 <h3 className="font-medium text-gray-900">
-                  {item.variant.product.name}
+                  {item.product?.name || "Unknown Product"}
                 </h3>
                 <p className="text-sm text-gray-600">
                   Quantity: {item.quantity}
                 </p>
+                {item.size && (
+                  <p className="text-xs text-gray-500">
+                    Size: {item.size.name}
+                  </p>
+                )}
+                {item.color && (
+                  <p className="text-xs text-gray-500">
+                    Color: {item.color.name}
+                  </p>
+                )}
               </div>
               <div className="text-right">
                 <p className="font-medium text-gray-900">
@@ -171,7 +154,7 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <h3 className="font-medium text-gray-900">Name</h3>
-              <p className="text-gray-600">{order.user.name}</p>
+              <p className="text-gray-600">{order.user.name || "N/A"}</p>
             </div>
             <div>
               <h3 className="font-medium text-gray-900">Email</h3>
@@ -199,4 +182,3 @@ export default function OrderSuccess({ order }: OrderSuccessProps) {
     </div>
   );
 }
-
