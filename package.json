@@ -17,6 +17,9 @@
       "legacy-peer-deps": true
     }
   },
+  "engines": {
+    "node": "22.13.0"
+  },
   "dependencies": {
     "@neondatabase/serverless": "^1.0.1",
     "@radix-ui/react-tabs": "^1.1.13",
