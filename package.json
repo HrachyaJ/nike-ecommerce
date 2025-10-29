@@ -21,8 +21,13 @@
     "node": "20.x"
   },
   "dependencies": {
+    "@eslint/eslintrc": "^3",
     "@neondatabase/serverless": "^1.0.1",
     "@radix-ui/react-tabs": "^1.1.13",
+    "@types/node": "^20",
+    "@types/pg": "^8.15.5",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
     "@types/uuid": "^10.0.0",
     "@uploadthing/react": "^7.3.3",
     "autoprefixer": "^10.4.21",
@@ -30,7 +35,10 @@
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dotenv": "^17.2.1",
+    "drizzle-kit": "^0.31.5",
     "drizzle-orm": "^0.44.4",
+    "eslint": "^9",
+    "eslint-config-next": "15.5.0",
     "lucide": "^0.542.0",
     "lucide-react": "^0.542.0",
     "next": "15.5.0",
@@ -42,21 +50,11 @@
     "stripe": "^18.5.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^3.4.18",
+    "tsx": "^4.20.4",
+    "typescript": "^5",
     "uploadthing": "^7.7.4",
     "uuid": "^11.1.0",
     "zod": "^4.1.11",
     "zustand": "^5.0.8"
-  },
-  "devDependencies": {
-    "@eslint/eslintrc": "^3",
-    "@types/node": "^20",
-    "@types/pg": "^8.15.5",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "drizzle-kit": "^0.31.5",
-    "eslint": "^9",
-    "eslint-config-next": "15.5.0",
-    "tsx": "^4.20.4",
-    "typescript": "^5"
   }
 }
