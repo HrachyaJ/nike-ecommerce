@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { promises as fs } from "fs";
 import path from "path";
 import * as dotenv from "dotenv";
+import { FILTER_CATEGORIES } from "../constants";
 
 dotenv.config({ path: ".env.local" });
 
@@ -46,11 +47,13 @@ async function seedFiltersAndBrand() {
       .onConflictDoNothing({ target: schema.colors.slug });
   }
 
-  const sizesData = ["XS", "S", "M", "L", "XL", "XXL"].map((name, i) => ({
-    name,
-    slug: name.toLowerCase(),
-    sortOrder: i,
-  }));
+  const sizesData = FILTER_CATEGORIES.SIZE_LABELS.map(
+    (name: string, i: number) => ({
+      name,
+      slug: name.toLowerCase(),
+      sortOrder: i,
+    })
+  );
   for (const s of sizesData) {
     await db
       .insert(schema.sizes)

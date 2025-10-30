@@ -3,10 +3,11 @@
 import { useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
-const GENDER = ["Men", "Women", "Kids"] as const;
-const SIZES = ["5", "6", "7", "8", "9", "10", "11"];
-const COLORS = ["white", "black", "red", "blue", "navy"];
-const PRICE = ["0-50", "50-100", "100-150", "150+"];
+import {
+  FILTER_CATEGORIES,
+  SIZE_GUIDE,
+  COLOR_CATEGORIES,
+} from "@/lib/constants";
 
 export default function Filters() {
   const router = useRouter();
@@ -102,7 +103,7 @@ export default function Filters() {
       <hr className="border-light-300" />
       <Section title="Gender">
         <div className="grid grid-cols-2 gap-2">
-          {GENDER.map((g) => (
+          {FILTER_CATEGORIES.GENDER.map((g) => (
             <label
               key={g}
               className="flex items-center gap-2 text-sm cursor-pointer"
@@ -121,7 +122,7 @@ export default function Filters() {
 
       <Section title="Size">
         <div className="grid grid-cols-4 gap-2">
-          {SIZES.map((s) => (
+          {SIZE_GUIDE.US.map((s) => (
             <label
               key={s}
               className="flex items-center gap-2 text-sm cursor-pointer"
@@ -129,8 +130,8 @@ export default function Filters() {
               <input
                 type="checkbox"
                 className="accent-dark-900"
-                checked={isChecked("size", s)}
-                onChange={() => onToggle("size", s)}
+                checked={isChecked("size", s.toString())}
+                onChange={() => onToggle("size", s.toString())}
               />
               <span>{s}</span>
             </label>
@@ -140,7 +141,7 @@ export default function Filters() {
 
       <Section title="Color">
         <div className="grid grid-cols-3 gap-2">
-          {COLORS.map((c) => (
+          {COLOR_CATEGORIES.map((c) => (
             <label
               key={c}
               className="flex items-center gap-2 text-sm cursor-pointer"
@@ -148,8 +149,8 @@ export default function Filters() {
               <input
                 type="checkbox"
                 className="accent-dark-900"
-                checked={isChecked("color", c)}
-                onChange={() => onToggle("color", c)}
+                checked={isChecked("color", c.toLowerCase())}
+                onChange={() => onToggle("color", c.toLowerCase())}
               />
               <span className="capitalize">{c}</span>
             </label>
@@ -159,20 +160,18 @@ export default function Filters() {
 
       <Section title="Price">
         <div className="grid grid-cols-2 gap-2">
-          {PRICE.map((p) => (
+          {FILTER_CATEGORIES.PRICE_RANGES.map((p) => (
             <label
-              key={p}
+              key={p.value}
               className="flex items-center gap-2 text-sm cursor-pointer"
             >
               <input
                 type="checkbox"
                 className="accent-dark-900"
-                checked={isChecked("price", p)}
-                onChange={() => onToggle("price", p)}
+                checked={isChecked("price", p.value)}
+                onChange={() => onToggle("price", p.value)}
               />
-              <span>
-                {p === "150+" ? "$150+" : `$${p.replace("-", " - $")}`}
-              </span>
+              <span>{p.label}</span>
             </label>
           ))}
         </div>

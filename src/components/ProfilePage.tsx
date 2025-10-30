@@ -78,8 +78,8 @@ export default function ProfilePage({
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
       {/* User Header */}
-      <div className="flex items-center gap-6 mb-12">
-        <div className="relative w-24 h-24 rounded-full overflow-hidden bg-gray-200">
+      <div className="flex flex-col sm:flex-row items-center gap-4 sm:gap-6 mb-8 sm:mb-12">
+        <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full overflow-hidden bg-gray-200">
           {user.image ? (
             <Image
               src={user.image}
@@ -88,24 +88,26 @@ export default function ProfilePage({
               className="object-cover"
             />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-dark-900 text-white text-3xl font-bold">
+            <div className="w-full h-full flex items-center justify-center bg-dark-900 text-white text-2xl sm:text-3xl font-bold">
               {user.name?.charAt(0).toUpperCase() ||
                 user.email.charAt(0).toUpperCase()}
             </div>
           )}
         </div>
-        <div>
-          <h1 className="text-3xl font-bold mb-1">{user.name || "User"}</h1>
-          <p className="text-gray-600">{user.email}</p>
+        <div className="text-center sm:text-left">
+          <h1 className="text-2xl sm:text-3xl font-bold mb-1">
+            {user.name || "User"}
+          </h1>
+          <p className="text-gray-600 text-sm sm:text-base">{user.email}</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="border-b border-gray-200 mb-8">
-        <nav className="flex gap-8">
+      <div className="border-b border-gray-200 mb-8 overflow-x-auto">
+        <nav className="flex gap-4 sm:gap-8 min-w-max pb-1">
           <button
             onClick={() => setActiveTab("orders")}
-            className={`pb-4 text-base font-medium transition-colors ${
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
               activeTab === "orders"
                 ? "border-b-2 border-dark-900 text-dark-900"
                 : "text-gray-500 hover:text-dark-900"
@@ -115,7 +117,7 @@ export default function ProfilePage({
           </button>
           <button
             onClick={() => setActiveTab("favorites")}
-            className={`pb-4 text-base font-medium transition-colors ${
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
               activeTab === "favorites"
                 ? "border-b-2 border-dark-900 text-dark-900"
                 : "text-gray-500 hover:text-dark-900"
@@ -125,7 +127,7 @@ export default function ProfilePage({
           </button>
           <button
             onClick={() => setActiveTab("details")}
-            className={`pb-4 text-base font-medium transition-colors ${
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
               activeTab === "details"
                 ? "border-b-2 border-dark-900 text-dark-900"
                 : "text-gray-500 hover:text-dark-900"
@@ -135,7 +137,7 @@ export default function ProfilePage({
           </button>
           <button
             onClick={() => setActiveTab("payment")}
-            className={`pb-4 text-base font-medium transition-colors ${
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
               activeTab === "payment"
                 ? "border-b-2 border-dark-900 text-dark-900"
                 : "text-gray-500 hover:text-dark-900"
@@ -145,7 +147,7 @@ export default function ProfilePage({
           </button>
           <button
             onClick={() => setActiveTab("address")}
-            className={`pb-4 text-base font-medium transition-colors ${
+            className={`pb-3 text-sm sm:text-base font-medium transition-colors whitespace-nowrap ${
               activeTab === "address"
                 ? "border-b-2 border-dark-900 text-dark-900"
                 : "text-gray-500 hover:text-dark-900"
@@ -167,8 +169,11 @@ export default function ProfilePage({
             orders.map((order) => (
               <div key={order.id} className="bg-gray-50 rounded-lg p-6">
                 {order.items.map((item) => (
-                  <div key={item.id} className="flex gap-6 mb-6 last:mb-0">
-                    <div className="w-32 h-32 bg-white rounded-lg overflow-hidden flex-shrink-0">
+                  <div
+                    key={item.id}
+                    className="flex flex-col sm:flex-row gap-4 sm:gap-6 mb-6 last:mb-0"
+                  >
+                    <div className="w-full sm:w-32 h-40 sm:h-32 bg-white rounded-lg overflow-hidden shrink-0">
                       {item.imageUrl ? (
                         <Image
                           src={item.imageUrl}
@@ -192,23 +197,23 @@ export default function ProfilePage({
                       >
                         {getStatusText(order.status, order.createdAt)}
                       </p>
-                      <h3 className="text-xl font-semibold mb-1">
+                      <h3 className="text-lg sm:text-xl font-semibold mb-1">
                         {item.product?.name || "Unknown Product"}
                       </h3>
-                      <p className="text-gray-600 text-sm mb-2">
+                      <p className="text-gray-600 text-sm mb-2 line-clamp-2 sm:line-clamp-none">
                         {item.product?.description || ""}
                       </p>
-                      <div className="flex gap-6 text-sm text-gray-600">
+                      <div className="flex gap-4 sm:gap-6 text-sm text-gray-600 flex-wrap">
                         <span>Size {item.size?.name || "N/A"}</span>
                         <span>Quantity {item.quantity}</span>
                       </div>
                       {item.color && (
-                        <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2 flex-wrap">
                           <span className="text-sm text-gray-600">Color:</span>
                           <div className="flex items-center gap-2">
                             {item.color.hex && (
                               <div
-                                className="w-5 h-5 rounded-full border border-gray-300"
+                                className="w-4 sm:w-5 h-4 sm:h-5 rounded-full border border-gray-300"
                                 style={{ backgroundColor: item.color.hex }}
                               />
                             )}
@@ -220,8 +225,8 @@ export default function ProfilePage({
                       )}
                     </div>
 
-                    <div className="text-right flex flex-col justify-between">
-                      <p className="text-xl font-semibold">
+                    <div className="flex sm:flex-col justify-between items-start sm:items-end gap-2 sm:gap-0">
+                      <p className="text-lg sm:text-xl font-semibold">
                         ${parseFloat(item.priceAtPurchase).toFixed(2)}
                       </p>
                       {order.status !== "cancelled" &&
@@ -243,7 +248,10 @@ export default function ProfilePage({
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                               />
                             </svg>
-                            Cancel Order
+                            <span className="sm:hidden">Cancel</span>
+                            <span className="hidden sm:inline">
+                              Cancel Order
+                            </span>
                           </button>
                         )}
                     </div>

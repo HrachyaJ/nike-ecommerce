@@ -23,7 +23,9 @@ import {
   DEFAULT_RATING,
   RECOMMENDED_PRODUCTS_LIMIT,
   REVIEWS_PREVIEW_LIMIT,
-} from "@/lib/constants/product";
+  SHIPPING,
+  RETURNS,
+} from "@/lib/constants";
 import type { Metadata } from "next";
 
 interface ProductPageProps {
@@ -331,15 +333,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
               <CollapsibleSection title="Shipping & Returns">
                 <div className="space-y-3 text-gray-700 text-sm">
                   <p>
-                    <strong>Free shipping</strong> on orders over $50. Standard
-                    shipping takes 3-5 business days.
+                    <strong>Free shipping</strong> on orders over $
+                    {SHIPPING.STANDARD.threshold}. {SHIPPING.STANDARD.name}{" "}
+                    takes {SHIPPING.STANDARD.days}.
                   </p>
                   <p>
-                    <strong>Free returns</strong> within 30 days of purchase.
-                    Items must be in original condition.
+                    <strong>{RETURNS.FREE ? "Free returns" : "Returns"}</strong>{" "}
+                    within {RETURNS.WINDOW_DAYS} days of purchase.
+                    {RETURNS.CONDITIONS.map((condition, i) => (
+                      <span key={i} className="block ml-4 text-xs mt-1">
+                        • {condition}
+                      </span>
+                    ))}
                   </p>
                   <p>
-                    <strong>Express shipping</strong> available for an
+                    <strong>{SHIPPING.EXPRESS.name}</strong> available for $
+                    {SHIPPING.EXPRESS.cost}
                     additional fee. Next-day delivery in select areas.
                   </p>
                 </div>

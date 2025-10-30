@@ -8,6 +8,11 @@ const jost = Jost({
   weight: ["400", "500", "600", "700"],
 });
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+};
+
 export const metadata: Metadata = {
   icons: { icon: "/logo.svg" },
   title: "Nike - Just Do It",
@@ -22,7 +27,6 @@ export const metadata: Metadata = {
     "athletic wear",
   ],
   authors: [{ name: "Nike E-commerce" }],
-  viewport: "width=device-width, initial-scale=1",
 };
 
 export default function RootLayout({

@@ -1,5 +1,8 @@
 import Image from "next/image";
 import Link from "next/link";
+import { BADGE_TYPES } from "@/lib/constants";
+
+export type BadgeType = keyof typeof BADGE_TYPES;
 
 export interface CardProps {
   id?: string;
@@ -9,8 +12,7 @@ export interface CardProps {
   imageSrc: string;
   imageAlt: string;
   price?: number;
-  badge?: string;
-  badgeColor?: "orange" | "green" | "red" | "blue";
+  badge?: BadgeType;
   colorOptions?: string;
   href?: string;
   onClick?: () => void;
@@ -25,30 +27,22 @@ export default function Card({
   imageAlt,
   price,
   badge,
-  badgeColor = "orange",
   colorOptions,
   href,
   onClick,
   className = "",
 }: CardProps) {
-  const badgeColorClasses = {
-    orange: "bg-orange-500 text-orange-500",
-    green: "bg-green-500 text-green-500",
-    red: "bg-red-500 text-red-500",
-    blue: "bg-blue-500 text-blue-500",
-  };
-
   const CardContent = (
     <div
       className={` overflow-hidden transition-all duration-300 ${className}`}
     >
       {/* Badge */}
-      {badge && (
-        <div className="absolute top-4 left-4 z-10 bg-white rounded-[16px] py-0.5 px-3">
+      {badge && BADGE_TYPES[badge] && (
+        <div className="absolute top-4 left-4 z-10 bg-white rounded-2xl py-0.5 px-3">
           <span
-            className={`inline-block px-0 py-0 text-sm font-medium ${badgeColorClasses[badgeColor]} bg-transparent`}
+            className={`inline-block px-0 py-0 text-sm font-medium ${BADGE_TYPES[badge].color} bg-transparent`}
           >
-            {badge}
+            {BADGE_TYPES[badge].label}
           </span>
         </div>
       )}

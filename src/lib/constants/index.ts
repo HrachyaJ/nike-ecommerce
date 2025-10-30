@@ -61,8 +61,8 @@ export const SIZE_GUIDE = {
 
 // Product filters
 export const FILTER_CATEGORIES = {
-  GENDER: ["Men", "Women", "Kids", "Unisex"],
-  SIZE_LABELS: ["XXS", "XS", "S", "M", "L", "XL", "XXL", "XXXL"],
+  GENDER: ["Men", "Women", "Kids"],
+  SIZE_LABELS: ["XS", "S", "M", "L", "XL", "XXL"],
   PRICE_RANGES: [
     { label: "Under $50", value: "0-50" },
     { label: "$50 - $100", value: "50-100" },
@@ -112,14 +112,14 @@ export const IMAGE_CONFIG = {
 } as const;
 
 // Color swatches
-export const COLOR_CATEGORIES = {
-  NEUTRALS: ["Black", "White", "Gray", "Grey", "Beige", "Tan", "Cream"],
-  REDS: ["Red", "Burgundy", "Maroon", "Pink", "Coral", "Salmon"],
-  BLUES: ["Blue", "Navy", "Teal", "Turquoise", "Cyan"],
-  GREENS: ["Green", "Olive", "Lime", "Mint"],
-  EARTH_TONES: ["Brown", "Tan", "Khaki", "Beige"],
-  JEWEL_TONES: ["Purple", "Violet", "Gold", "Silver"],
-} as const;
+export const COLOR_CATEGORIES = [
+  "Black",
+  "White",
+  "Red",
+  "Green",
+  "Grey",
+  "Blue",
+] as const;
 
 // Validation
 export const VALIDATION = {

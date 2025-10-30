@@ -31,7 +31,7 @@ export default function PromoSection() {
             </p>
             <Link
               href="/products"
-              className='inline-block bg-dark-900 text-white px-8 py-3 rounded-full text-lg'
+              className="inline-block bg-dark-900 text-white px-8 py-3 rounded-full text-lg"
             >
               Shop Now
             </Link>
@@ -45,7 +45,7 @@ export default function PromoSection() {
               width={700}
               height={450}
               priority
-              className="object-contain w-full max-w-lg lg:max-w-none transform rotate-[-10deg] scale-110"
+              className="object-contain w-full max-w-lg lg:max-w-none transform scale-110"
             />
           </div>
         </div>

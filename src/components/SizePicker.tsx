@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { SIZE_GUIDE } from "@/lib/constants";
 
 interface Size {
   size: string;
@@ -83,11 +84,19 @@ export default function SizePicker({ sizes }: SizePickerProps) {
           id="size-guide-tooltip"
           className="absolute bottom-full left-0 mb-2 w-72 p-3 bg-gray-900 text-white text-xs rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200"
         >
-          To measure your foot size, tape a piece of paper to a hard floor,
-          stand on it with one foot, trace its outline, and mark the tip of your
-          longest toe and the outermost part of your heel. Then, measure the
-          straight line distance from the heel mark to the toe mark to get your
-          foot&apos;s length
+          <p className="mb-2 font-medium">Size Conversion Chart:</p>
+          <ul className="space-y-1 mb-3">
+            {SIZE_GUIDE.US.map((us, index) => (
+              <li key={us}>
+                US {us}: EU {SIZE_GUIDE.EU[index]}, UK {SIZE_GUIDE.UK[index]},{" "}
+                {SIZE_GUIDE.CM[index]}cm
+              </li>
+            ))}
+          </ul>
+          <p className="text-xs">
+            To measure your foot, stand on paper, trace its outline, and measure
+            from heel to longest toe.
+          </p>
           <div className="absolute -bottom-2 left-4 w-4 h-4 bg-gray-900 transform rotate-45"></div>
         </div>
       </div>

@@ -2,6 +2,7 @@ import { Card } from "@/components";
 import Filters from "@/components/Filters";
 import Sort from "@/components/Sort";
 import { getAllProducts } from "@/lib/actions/product";
+import { DEFAULT_PRODUCT_IMAGE, MIN_PRICE } from "@/lib/constants";
 import { parseFilterParams } from "@/lib/utils/query";
 import type { Metadata } from "next";
 
@@ -158,8 +159,8 @@ export default async function ProductsPage({
                       key={product.id}
                       title={product.name}
                       description={product.subtitle || ""}
-                      imageSrc={product.imageUrl || "/placeholder-shoe.jpg"}
-                      price={product.minPrice || 0}
+                      imageSrc={product.imageUrl || DEFAULT_PRODUCT_IMAGE}
+                      price={product.minPrice || MIN_PRICE}
                       imageAlt={`${product.name} shoe`}
                       href={`/products/${product.id}`}
                     />

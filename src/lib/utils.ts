@@ -1,5 +1,10 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  PRODUCT_STATUS,
+  LOW_STOCK_THRESHOLD,
+  MIN_STOCK_THRESHOLD,
+} from "./constants/index";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -10,42 +15,16 @@ export function cn(...inputs: ClassValue[]) {
  * Centralized helpers for product-related operations
  */
 
+import { COLOR_CATEGORIES } from "./constants";
+
 // Color mapping for product swatches
 const COLOR_HEX_MAP: Record<string, string> = {
   black: "#000000",
   white: "#FFFFFF",
   red: "#FF0000",
-  blue: "#0000FF",
-  green: "#008000",
-  yellow: "#FFFF00",
-  orange: "#FFA500",
-  purple: "#800080",
-  pink: "#FFC0CB",
-  brown: "#A52A2A",
-  gray: "#808080",
+  green: "#00FF00",
   grey: "#808080",
-  navy: "#000080",
-  burgundy: "#800020",
-  maroon: "#800000",
-  tan: "#D2B48C",
-  beige: "#F5F5DC",
-  cream: "#FFFDD0",
-  silver: "#C0C0C0",
-  gold: "#FFD700",
-  khaki: "#F0E68C",
-  olive: "#808000",
-  teal: "#008080",
-  cyan: "#00FFFF",
-  magenta: "#FF00FF",
-  lime: "#00FF00",
-  indigo: "#4B0082",
-  violet: "#EE82EE",
-  coral: "#FF7F50",
-  salmon: "#FA8072",
-  peach: "#FFE5B4",
-  mint: "#98FF98",
-  lavender: "#E6E6FA",
-  turquoise: "#40E0D0",
+  blue: "#0000FF",
 };
 
 /**
@@ -297,10 +276,10 @@ export function isInStock(
 export function getStockStatus(stockCount: number | null | undefined): string {
   const stock = stockCount ?? 0;
 
-  if (stock === 0) return "Out of Stock";
-  if (stock <= 5) return "Low Stock";
-  if (stock <= 10) return "Limited Stock";
-  return "In Stock";
+  if (stock === 0) return PRODUCT_STATUS.OUT_OF_STOCK;
+  if (stock <= LOW_STOCK_THRESHOLD) return "Low Stock";
+  if (stock <= MIN_STOCK_THRESHOLD) return "Limited Stock";
+  return PRODUCT_STATUS.AVAILABLE;
 }
 
 /**

@@ -1,7 +1,20 @@
 "use server";
 
-import { and, asc, count, desc, eq, ilike, inArray, isNull, or, sql, type SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  count,
+  desc,
+  eq,
+  ilike,
+  inArray,
+  isNull,
+  or,
+  sql,
+  type SQL,
+} from "drizzle-orm";
 import { db } from "@/lib/db";
+import { REVIEWS_PER_PAGE } from "@/lib/constants";
 import {
   brands,
   categories,
@@ -44,14 +57,12 @@ export type GetAllProductsResult = {
 export async function debugImageData() {
   try {
     console.log("=== DEBUG: Checking image data ===");
-    
+
     // Check if there are any images in the database
-    const imageCount = await db
-      .select({ count: count() })
-      .from(productImages);
-    
+    const imageCount = await db.select({ count: count() }).from(productImages);
+
     console.log("Total images in database:", imageCount[0]?.count || 0);
-    
+
     // Get sample images
     const sampleImages = await db
       .select({
@@ -64,9 +75,9 @@ export async function debugImageData() {
       })
       .from(productImages)
       .limit(5);
-    
+
     console.log("Sample images:", sampleImages);
-    
+
     // Check products with no images
     const productsWithoutImages = await db
       .select({
@@ -76,14 +87,11 @@ export async function debugImageData() {
       })
       .from(products)
       .leftJoin(productImages, eq(productImages.productId, products.id))
-      .where(and(
-        eq(products.isPublished, true),
-        isNull(productImages.id)
-      ))
+      .where(and(eq(products.isPublished, true), isNull(productImages.id)))
       .limit(5);
-    
+
     console.log("Products without images:", productsWithoutImages);
-    
+
     return {
       totalImages: imageCount[0]?.count || 0,
       sampleImages,
@@ -95,15 +103,19 @@ export async function debugImageData() {
   }
 }
 
-export async function getAllProducts(filters: NormalizedProductFilters): Promise<GetAllProductsResult> {
+export async function getAllProducts(
+  filters: NormalizedProductFilters
+): Promise<GetAllProductsResult> {
   try {
     console.log("=== DEBUG: getAllProducts called with filters ===", filters);
-    
+
     const conds: SQL[] = [eq(products.isPublished, true)];
 
     if (filters.search) {
       const pattern = `%${filters.search}%`;
-      conds.push(or(ilike(products.name, pattern), ilike(products.description, pattern))!);
+      conds.push(
+        or(ilike(products.name, pattern), ilike(products.description, pattern))!
+      );
     }
 
     if (filters.genderSlugs.length) {
@@ -120,7 +132,11 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
 
     const hasSize = filters.sizeSlugs.length > 0;
     const hasColor = filters.colorSlugs.length > 0;
-    const hasPrice = !!(filters.priceMin !== undefined || filters.priceMax !== undefined || filters.priceRanges.length);
+    const hasPrice = !!(
+      filters.priceMin !== undefined ||
+      filters.priceMax !== undefined ||
+      filters.priceRanges.length
+    );
 
     console.log("=== DEBUG: Filter flags ===", { hasSize, hasColor, hasPrice });
 
@@ -133,7 +149,7 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
         .where(inArray(sizes.slug, filters.sizeSlugs));
       variantConds.push(inArray(productVariants.sizeId, sizeIds));
     }
-    
+
     if (hasColor) {
       const colorIds = db
         .select({ id: colors.id })
@@ -141,7 +157,7 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
         .where(inArray(colors.slug, filters.colorSlugs));
       variantConds.push(inArray(productVariants.colorId, colorIds));
     }
-    
+
     if (hasPrice) {
       const priceBounds: SQL[] = [];
       if (filters.priceRanges.length) {
@@ -158,8 +174,14 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
       }
       if (filters.priceMin !== undefined || filters.priceMax !== undefined) {
         const subConds: SQL[] = [];
-        if (filters.priceMin !== undefined) subConds.push(sql`(${productVariants.price})::numeric >= ${filters.priceMin}`);
-        if (filters.priceMax !== undefined) subConds.push(sql`(${productVariants.price})::numeric <= ${filters.priceMax}`);
+        if (filters.priceMin !== undefined)
+          subConds.push(
+            sql`(${productVariants.price})::numeric >= ${filters.priceMin}`
+          );
+        if (filters.priceMax !== undefined)
+          subConds.push(
+            sql`(${productVariants.price})::numeric <= ${filters.priceMax}`
+          );
         if (subConds.length) priceBounds.push(and(...subConds)!);
       }
       if (priceBounds.length) {
@@ -209,7 +231,9 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
     };
 
     // FIXED: Get the first image (rn = 1) for each product
-    const imageAgg = sql<string | null>`max(case when ${imagesJoin.rn} = 1 then ${imagesJoin.url} else null end)`;
+    const imageAgg = sql<
+      string | null
+    >`max(case when ${imagesJoin.rn} = 1 then ${imagesJoin.url} else null end)`;
 
     let primaryOrder: SQL;
     switch (filters.sort) {
@@ -280,18 +304,21 @@ export async function getAllProducts(filters: NormalizedProductFilters): Promise
         createdAt: r.createdAt,
         subtitle: r.subtitle ? `${r.subtitle} Shoes` : null,
       };
-      
+
       console.log(`=== DEBUG: Product ${r.name} imageUrl ===`, r.imageUrl);
       return product;
     });
 
     const totalCount = countRows[0]?.cnt ?? 0;
 
-    console.log("=== DEBUG: Returning ===", { productsCount: productsOut.length, totalCount });
+    console.log("=== DEBUG: Returning ===", {
+      productsCount: productsOut.length,
+      totalCount,
+    });
 
     return { products: productsOut, totalCount };
   } catch (error) {
-    console.error('Error in getAllProducts:', error);
+    console.error("Error in getAllProducts:", error);
     // Return empty result instead of throwing to prevent page crashes
     return { products: [], totalCount: 0 };
   }
@@ -310,7 +337,11 @@ export async function getProductImages() {
         sortOrder: productImages.sortOrder,
       })
       .from(productImages)
-      .orderBy(productImages.productId, desc(productImages.isPrimary), productImages.sortOrder)
+      .orderBy(
+        productImages.productId,
+        desc(productImages.isPrimary),
+        productImages.sortOrder
+      )
       .limit(20);
 
     console.log("=== All images in database ===", images);
@@ -337,7 +368,9 @@ export type FullProduct = {
   images: ProductImage[];
 };
 
-export async function getProduct(productId: string): Promise<FullProduct | null> {
+export async function getProduct(
+  productId: string
+): Promise<FullProduct | null> {
   try {
     if (!productId?.trim()) {
       return null;
@@ -372,7 +405,9 @@ export async function getProduct(productId: string): Promise<FullProduct | null>
         variantId: productVariants.id,
         variantSku: productVariants.sku,
         variantPrice: sql<number | null>`${productVariants.price}::numeric`,
-        variantSalePrice: sql<number | null>`${productVariants.salePrice}::numeric`,
+        variantSalePrice: sql<
+          number | null
+        >`${productVariants.salePrice}::numeric`,
         variantColorId: productVariants.colorId,
         variantSizeId: productVariants.sizeId,
         variantInStock: productVariants.inStock,
@@ -457,7 +492,8 @@ export async function getProduct(productId: string): Promise<FullProduct | null>
           productId: head.productId,
           sku: r.variantSku!,
           price: r.variantPrice !== null ? String(r.variantPrice) : "0",
-          salePrice: r.variantSalePrice !== null ? String(r.variantSalePrice) : null,
+          salePrice:
+            r.variantSalePrice !== null ? String(r.variantSalePrice) : null,
           colorId: r.variantColorId!,
           sizeId: r.variantSizeId!,
           inStock: r.variantInStock!,
@@ -500,7 +536,7 @@ export async function getProduct(productId: string): Promise<FullProduct | null>
       images: Array.from(imagesMap.values()),
     };
   } catch (error) {
-    console.error('Error in getProduct:', error);
+    console.error("Error in getProduct:", error);
     return null;
   }
 }
@@ -540,7 +576,7 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
       .innerJoin(users, eq(users.id, reviews.userId))
       .where(eq(reviews.productId, productId))
       .orderBy(desc(reviews.createdAt))
-      .limit(10);
+      .limit(REVIEWS_PER_PAGE);
 
     return rows.map((r) => ({
       id: r.id,
@@ -551,12 +587,14 @@ export async function getProductReviews(productId: string): Promise<Review[]> {
       createdAt: r.createdAt.toISOString(),
     }));
   } catch (error) {
-    console.error('Error in getProductReviews:', error);
+    console.error("Error in getProductReviews:", error);
     return [];
   }
 }
 
-export async function getRecommendedProducts(productId: string): Promise<RecommendedProduct[]> {
+export async function getRecommendedProducts(
+  productId: string
+): Promise<RecommendedProduct[]> {
   try {
     if (!productId?.trim()) {
       return [];
@@ -589,7 +627,7 @@ export async function getRecommendedProducts(productId: string): Promise<Recomme
         productId: productImages.productId,
         url: productImages.url,
         rn: sql<number>`row_number() over (partition by ${productImages.productId} order by ${productImages.isPrimary} desc, ${productImages.sortOrder} asc)`.as(
-          "rn",
+          "rn"
         ),
       })
       .from(productImages)
@@ -606,19 +644,19 @@ export async function getRecommendedProducts(productId: string): Promise<Recomme
         id: products.id,
         title: products.name,
         minPrice: sql<number | null>`min(${v.price})`,
-        imageUrl: sql<string | null>`max(case when ${pi.rn} = 1 then ${pi.url} else null end)`,
+        imageUrl: sql<
+          string | null
+        >`max(case when ${pi.rn} = 1 then ${pi.url} else null end)`,
         createdAt: products.createdAt,
       })
       .from(products)
       .leftJoin(v, eq(v.productId, products.id))
       .leftJoin(pi, eq(pi.productId, products.id))
-      .where(and(eq(products.isPublished, true), sql`${products.id} <> ${productId}`))
-      .groupBy(products.id, products.name, products.createdAt)
-      .orderBy(
-        desc(priority),
-        desc(products.createdAt),
-        asc(products.id)
+      .where(
+        and(eq(products.isPublished, true), sql`${products.id} <> ${productId}`)
       )
+      .groupBy(products.id, products.name, products.createdAt)
+      .orderBy(desc(priority), desc(products.createdAt), asc(products.id))
       .limit(8);
 
     const out: RecommendedProduct[] = [];
@@ -635,7 +673,7 @@ export async function getRecommendedProducts(productId: string): Promise<Recomme
     }
     return out;
   } catch (error) {
-    console.error('Error in getRecommendedProducts:', error);
+    console.error("Error in getRecommendedProducts:", error);
     return [];
   }
 }

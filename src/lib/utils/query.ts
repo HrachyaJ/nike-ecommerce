@@ -1,4 +1,5 @@
 import qs from "query-string";
+import { PRODUCTS_PER_PAGE, MIN_PRICE, MAX_PRICE } from "@/lib/constants";
 
 type QueryValue =
   | string
@@ -200,9 +201,12 @@ export function parseFilterParams(
   const pageStr = getStr("page");
   const page = Math.max(1, Number(pageStr) || 1);
 
+  // Parse pagination parameters
   const limitStr = getStr("limit");
-  const limitRaw = Number(limitStr) || 24;
-  const limit = Math.max(1, Math.min(limitRaw, 60));
+  const limitRaw = Number(limitStr) || PRODUCTS_PER_PAGE;
+  // Ensure limit is between 1 and MAX_PRICE
+  // Using MAX_PRICE as an upper bound for pagination to prevent performance issues
+  const limit = Math.max(1, Math.min(limitRaw, MAX_PRICE));
 
   return {
     search,
